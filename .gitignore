@@ -1,0 +1,5 @@
+# Package Files #
+*.pyc
+
+#ignore vitrual env files
+venv/
