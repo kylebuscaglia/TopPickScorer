@@ -42,6 +42,8 @@ def fetch_player_stats(player_stats_dto: PlayerStats):
     except StatsNotFoundException as ex:
         print(f"Unable to get stats for {ex.message}")
         return None
+    # for players where more than 1 person has the same name, Josh Allen for example,
+    # we need to keep trying until we find the correct one
     while points is None or points == 0:
         counter = counter + 1
         formatted_stats_url = f"{base_url}/{player_stats_dto.last_name[0].upper()}/{formatted_name_only}0{counter}.htm"
@@ -58,12 +60,14 @@ def get_player_stats(url: str, week: int):
     if response.status_code > 207:
         raise StatsNotFoundException(f"received non 200 error code while trying to fetch: {url}")
     else:
+        # create a temp file to hold the page html while we parse through it
         temp = open('temp_file', 'w', encoding="utf-8")
         temp.write(response.text)
         temp.close()
         temp = open('temp_file', 'r', encoding="utf-8")
         lines = temp.readlines()
 
+        # this line represents the start of the stats block on the page
         stats_line = 'data-stat="week_num" >' + str(week) + '</td>'
         for line in lines:
             if stats_line in line:
@@ -75,6 +79,7 @@ def get_player_stats(url: str, week: int):
 
 
 def format_name_only(first_name, last_name):
+    # format the player name to match the pfr url format AlleJo for josh allen for example
     return f"{last_name[0:4]}{first_name[0:2]}"
 
 
